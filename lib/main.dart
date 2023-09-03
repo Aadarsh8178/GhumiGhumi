@@ -1,30 +1,53 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:whatever/screens/home.dart';
+import 'package:go_router/go_router.dart';
+import 'package:whatever/notification_service.dart';
+import 'package:whatever/screens/home_screen.dart';
 import 'package:whatever/screens/login.dart';
 import 'firebase_options.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  NotificationService().initNotification();
+  tz.initializeTimeZones();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
 }
 
+final GoRouter _router = GoRouter(
+  routes: <RouteBase>[
+    GoRoute(
+      path: '/',
+      builder: (BuildContext context, GoRouterState state) {
+        return const HomeScreen();
+      },
+      routes: <RouteBase>[
+        GoRoute(
+          path: 'login',
+          builder: (BuildContext context, GoRouterState state) {
+            return const LoginScreen();
+          },
+        ),
+      ],
+    ),
+  ],
+);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData.dark(
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routerConfig: _router,
     );
   }
 }
@@ -53,12 +76,14 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           if (snapshot.connectionState == ConnectionState.active) {
             if (snapshot.data == null) {
-              return const Login();
+              context.go("login");
             } else {
-              return const Home();
+              print(snapshot.data);
+              context.go("/");
             }
           }
-          return const Login();
+          context.go("/");
+          return const Text("Not Working");
         },
       ),
     );

@@ -32,7 +32,7 @@ class Signalling {
 
     RTCSessionDescription offer = await peerConnection!.createOffer();
     print('offer created ${offer.sdp}');
-    await peerConnection!.setLocalDescription(offer);
+    await peerConnection?.setLocalDescription(offer);
     Map<String, dynamic> channelWithOffer = {
       'offer': offer.toMap(),
       chatName: chatName
